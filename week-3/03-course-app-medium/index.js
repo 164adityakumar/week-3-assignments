@@ -1,16 +1,46 @@
 const express = require('express');
 const app = express();
+const fs = require('fs');
+
 
 app.use(express.json());
 
-let ADMINS = [];
-let USERS = [];
-let COURSES = [];
+const datauser=fs.readFileSync('users.json');
+const dataadmin=fs.readFileSync('Admins.json');
+const datacourses=fs.readFileSync('Courses.json');
+
+const userAuthentication = (req, res, next) => {      
+  const { username, password } = req.headers;   
+  const USERS=JSON.parse(datauser);
+
+  const user = USERS.find(u => u.username === username && u.password === password);
+  if (user) {
+    req.user = user;  // Add user object to the request
+    next();
+  } else {
+    res.status(403).json({ message: 'User authentication failed' });
+  }
+};
+
+const adminAuthentication = (req, res, next) => {
+  const { username, password}=req.headers;
+  const ADMINS=JSON.parse(dataadmin);
+
+  const admin=ADMINS.find(ad=> ad.username===username && ad.password===password);
+
+  if(admin)
+  {
+    req.admin=admin;
+    next();
+  }
+  else
+  res.status(403).json({message: 'Admin authentication failed'});
+}
 
 // Admin routes
 app.post('/admin/signup', (req, res) => {
   // logic to sign up admin
-  
+  const 
 });
 
 app.post('/admin/login', (req, res) => {
@@ -25,7 +55,14 @@ app.put('/admin/courses/:courseId', (req, res) => {
   // logic to edit a course
 });
 
-app.get('/admin/courses', (req, res) => {
+app.get('/admin/courses', (req, res) => const fs = require('fs');
+
+const data = 'Hello, world!';
+
+fs.writeFile('file.txt', data, (err) => {
+  if (err) throw err;
+  console.log('Data written to file');
+});{
   // logic to get all courses
 });
 
