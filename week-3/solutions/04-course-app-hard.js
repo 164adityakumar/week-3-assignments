@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 
 const SECRET = 'SECr3t';  // This should be in an environment variable in a real application
-
+const maxtime='1h';
 // Define mongoose schemas
 const userSchema = new mongoose.Schema({
   username: {type: String},
@@ -36,7 +36,7 @@ const authenticateJwt = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (authHeader) {
     const token = authHeader.split(' ')[1];
-    jwt.verify(token, SECRET, (err, user) => {
+    jwt.verify(token, SECRET, (err, user) => { // here 'user ' is the payload if the the verification is success then the output will be carried by the payload.
       if (err) {
         return res.sendStatus(403);
       }
@@ -61,7 +61,7 @@ app.post('/admin/signup', (req, res) => {
       const obj = { username: username, password: password };
       const newAdmin = new Admin(obj);
       newAdmin.save();
-      const token = jwt.sign({ username, role: 'admin' }, SECRET, { expiresIn: '1h' });
+      const token = jwt.sign({ username, role: 'admin' }, SECRET, { expiresIn: maxtime });
       res.json({ message: 'Admin created successfully', token });
     }
 
@@ -73,7 +73,7 @@ app.post('/admin/login', async (req, res) => {
   const { username, password } = req.headers;
   const admin = await Admin.findOne({ username, password });
   if (admin) {
-    const token = jwt.sign({ username, role: 'admin' }, SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ username, role: 'admin' }, SECRET, { expiresIn: maxtime });
     res.json({ message: 'Logged in successfully', token });
   } else {
     res.status(403).json({ message: 'Invalid username or password' });
@@ -109,7 +109,7 @@ app.post('/users/signup', async (req, res) => {
   } else {
     const newUser = new User({ username, password });
     await newUser.save();
-    const token = jwt.sign({ username, role: 'user' }, SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ username, role: 'user' }, SECRET, { expiresIn: maxtime });
     res.json({ message: 'User created successfully', token });
   }
 });
@@ -118,7 +118,7 @@ app.post('/users/login', async (req, res) => {
   const { username, password } = req.headers;
   const user = await User.findOne({ username, password });
   if (user) {
-    const token = jwt.sign({ username, role: 'user' }, SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ username, role: 'user' }, SECRET, { expiresIn: maxtime });
     res.json({ message: 'Logged in successfully', token });
   } else {
     res.status(403).json({ message: 'Invalid username or password' });
