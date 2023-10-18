@@ -2,7 +2,9 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const app = express();
+const cors = require('cors');
 
+app.use(cors());
 app.use(express.json());
 
 let ADMINS = [];
@@ -27,6 +29,7 @@ const authenticateJwt = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (authHeader) {
     const token = authHeader.split(' ')[1];
+    //here we are taking the element with index 1 after splitting the string because we are sending token as "Bearer "+ token
     jwt.verify(token, SECRET, (err, user) => {
       if (err) {
         return res.sendStatus(403);
@@ -40,6 +43,13 @@ const authenticateJwt = (req, res, next) => {
 };
 
 // Admin routes
+
+app.get('/admin/me', authenticateJwt, (req, res) => {
+  res.json({ 
+    username: req.user.username, 
+    role: req.user.role });
+})
+
 app.post('/admin/signup', (req, res) => {
   const { username, password } = req.body;
   const admin = ADMINS.find(a => a.username === username);
@@ -56,7 +66,7 @@ app.post('/admin/signup', (req, res) => {
 });
 
 app.post('/admin/login', (req, res) => {
-  const { username, password } = req.headers;
+  const { username, password } = req.body;
   const admin = ADMINS.find(a => a.username === username && a.password === password);
   if (admin) {
     const token = jwt.sign({ username, role: 'admin' }, SECRET, { expiresIn: '1h' });
@@ -147,4 +157,4 @@ app.get('/users/purchasedCourses', authenticateJwt, (req, res) => {
   }
 });
 
-app.listen(3000, () => console.log('Server running on port 3000'));
+app.listen(3000, () => console.log('Server running on port 3000 😎'));
